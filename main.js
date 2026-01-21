@@ -892,15 +892,17 @@ function startCamera() {
     // Build camera constraints based on device type
     let videoConstraints;
     if (isMobileDevice) {
-        // Mobile: use portrait mode with specific camera
+        // Mobile: use simple constraints to avoid zoom/crop issues
+        // Let the camera use its native resolution
         videoConstraints = {
-            facingMode: selectedCameraFacing,
-            width: { ideal: 720 },
-            height: { ideal: 1280 }, // Portrait aspect ratio
-            aspectRatio: { ideal: 9/16 }
+            facingMode: { ideal: selectedCameraFacing },
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 960 }
         };
         // Set video mirror based on camera facing
         video.style.transform = selectedCameraFacing === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+        // Use contain to show full video without cropping
+        video.style.objectFit = 'contain';
     } else {
         // Desktop: standard landscape
         videoConstraints = {
@@ -908,6 +910,7 @@ function startCamera() {
             height: { ideal: 720 }
         };
         video.style.transform = 'scaleX(-1)';
+        video.style.objectFit = 'cover';
     }
     
     navigator.mediaDevices.getUserMedia({ video: videoConstraints }).then(stream => {
